@@ -11,6 +11,11 @@ use Illuminate\Support\Str;
 
 class CompanyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -44,7 +49,7 @@ class CompanyController extends Controller
 
         $company = new Company();
         $data = $request->validate([
-            'logo' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'logo' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048|nullable',
             'name' => 'required|string',
             'email'=> 'email|nullable'
 
@@ -76,7 +81,7 @@ class CompanyController extends Controller
      */
     public function show($id)
     {
-        $company = Company::findOrFail($id);
+        $company = Company::find($id);
         return view('company.show', compact('company'));
     }
 
@@ -88,7 +93,7 @@ class CompanyController extends Controller
      */
     public function edit($id)
     {
-        $company = Company::findOrFail($id);
+        $company = Company::find($id);
         return view('company.edit', compact('company'));
     }
 
@@ -130,7 +135,7 @@ class CompanyController extends Controller
      */
     public function destroy($id)
     {
-         Company::findOrFail($id)->delete();
+         Company::find($id)->delete();
         return Redirect::to('/admin/companies')->with('message', 'Company deleted successfully');
     }
     public function newAccountNotification($email){

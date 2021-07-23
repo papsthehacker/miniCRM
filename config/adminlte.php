@@ -250,17 +250,17 @@ return [
             'text'        => 'Companies',
             'url'         => 'admin/companies',
             'icon'        => 'far fa-fw fa-file',
-            'label'       => 4,
+            'label'       => null,
             'label_color' => 'success',
         ],
         [
             'text'        => 'Employees',
             'url'         => 'admin/employees',
             'icon'        => 'far fa-fw fa-user',
-            'label'       => 4,
+            'label'       => null,
             'label_color' => 'success',
         ],
-        ['header' => 'account_settings'],
+        /*['header' => 'account_settings'],
         [
             'text' => 'profile',
             'url'  => 'admin/settings',
@@ -324,7 +324,7 @@ return [
             'text'       => 'information',
             'icon_color' => 'cyan',
             'url'        => '#',
-        ],
+        ],*/
     ],
 
     /*

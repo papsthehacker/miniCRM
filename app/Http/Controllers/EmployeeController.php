@@ -4,18 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\Employee;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-use JeroenNoten\LaravelAdminLte\Components\Tool\Datatable;
 
 class EmployeeController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Application|Factory|View
      */
     public function index(Request $request)
     {
@@ -26,7 +32,7 @@ class EmployeeController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Application|Factory|View
      */
     public function create()
     {
@@ -68,7 +74,7 @@ class EmployeeController extends Controller
      * Display the specified resource.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return Application|Factory|View
      */
     public function show($id)
     {
@@ -81,7 +87,7 @@ class EmployeeController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return Application|Factory|View
      */
     public function edit($id)
     {
@@ -97,7 +103,7 @@ class EmployeeController extends Controller
      *
      * @param \Illuminate\Http\Request $request
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, $id)
     {
@@ -105,7 +111,7 @@ class EmployeeController extends Controller
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'email' => 'email|unique:employees',
-            'picture' => 'image',
+            'picture' => 'image|nullable',
 
         );
 
@@ -118,12 +124,10 @@ class EmployeeController extends Controller
             $employee->first_name = $request['first_name'];
             $employee->last_name = $request['last_name'];
             $employee->email = $request['email'];
-            $employee->company_id = $request['company_id'];
+            $employee->company = $request['company'];
 
             $employee->save();
-
-            Session::flash('message', 'Employee updated successfully');
-            return Redirect::to('/admin/employees');
+            return Redirect::to('/admin/employees')->with('message', 'Employee updated successfully');
         }
     }
 
@@ -131,14 +135,13 @@ class EmployeeController extends Controller
      * Remove the specified resource from storage.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy($id)
     {
         $employee = Employee::findOrFail($id);
         $employee->delete();
 
-        Session::flash('message', 'Employee deleted successfully');
-        return Redirect::to('/admin/employees');
+        return Redirect::to('/admin/employees')->with('message', 'Employee deleted successfully');
     }
 }

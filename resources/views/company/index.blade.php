@@ -38,18 +38,20 @@
                     {{--                    <td>{{$company->logo}}</td>--}}
 
                     <td>
-                        <div class="d-flex flex-row justify-content-between">
-                            <div>
-                                <a href="{{route('companies.edit',$company->id)}}"
-                                   class="float-right btn-sm text-primary"
-                                />
-                                Edit
-                            </div>
-                            <div>
-                                <a href="{{route('companies.destroy', $company->id)}}"
-                                   class="float-right btn-sm text-danger "/>
-                                Delete
-                            </div>
+                        <div class="d-flex flex-row">
+                            <a href="{{route('companies.edit',$company->id)}}">
+                                <x-adminlte-button  class="btn-sm mr-4" label="Edit" type="submit" theme="primary"/>
+                            </a>
+                            <form action="{{route('companies.destroy', $company->id)}}">
+                                @method('DELETE')
+                                @csrf
+                                <div>
+                                    <x-adminlte-button class="btn-sm" label="Delete" type="submit" theme="danger"/>
+
+                                </div>
+                            </form>
+
+
                         </div>
                     </td>
                 </tr>
