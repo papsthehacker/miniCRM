@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\WelcomeMail;
 use App\Models\Company;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
@@ -16,7 +18,7 @@ class CompanyController extends Controller
      */
     public function index()
     {
-        $companies = Company::withCount('employees')->paginate(10);
+        $companies = Company::orderByDesc('name')->withCount('employees')->paginate(10);
         return view('company.index', compact('companies',));
 
     }
@@ -43,11 +45,13 @@ class CompanyController extends Controller
         $company = new Company();
         $data = $request->validate([
             'logo' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'name' => 'required|string'
+            'name' => 'required|string',
+            'email'=> 'email|nullable'
+
         ]);
         if ($request->hasFile('logo')) {
             $imageName = time().'_'.Str::slug($request->name) . '_' . $request->logo->getClientOriginalName();
-            $dir = $request->logo->storeAs('public/logos', $imageName);
+             $request->logo->storeAs('public/logos', $imageName);
             $path = asset('/storage/logos/'.$imageName);
            $company->logo = $path;
         }
@@ -57,8 +61,11 @@ class CompanyController extends Controller
         $company->website=$request->website;
         $company->email = $request->email;
         $company->save();
-          \Session::flash('message', 'Company updated successfully');
-          return Redirect::to('/admin/companies');
+        if($request->email != null){
+            $this->newAccountNotification($data['email']);
+        }
+
+          return Redirect::to('/admin/companies')->with('message', 'Company updated successfully');
     }
 
     /**
@@ -94,7 +101,25 @@ class CompanyController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $company =  Company::find($id);
+        $data = $request->validate([
+            'logo' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'name' => 'required|string',
+            'email'=> 'email|nullable'
+
+        ]);
+        if ($request->hasFile('logo')) {
+            $imageName = time().'_'.Str::slug($request->name) . '_' . $request->logo->getClientOriginalName();
+            $request->logo->storeAs('public/logos', $imageName);
+            $path = asset('/storage/logos/'.$imageName);
+            $company->logo = $path;
+        }
+
+
+        $company->name=$request->name;
+        $company->website=$request->website;
+        $company->email = $request->email;
+        $company->save();
     }
 
     /**
@@ -105,9 +130,14 @@ class CompanyController extends Controller
      */
     public function destroy($id)
     {
-        $company = Company::findOrFail($id);
-        $company->delete();
-        \Session::flash('message', 'Company deleted successfully');
-        return Redirect::to('/admin/companies');
+         Company::findOrFail($id)->delete();
+        return Redirect::to('/admin/companies')->with('message', 'Company deleted successfully');
+    }
+    public function newAccountNotification($email){
+        \Mail::to($email)->send(new WelcomeMail());
+    }
+
+    public function updateAttachment($id){
+        Company::find($id)->update(['logo'=>Company::saveAttachment()]);
     }
 }

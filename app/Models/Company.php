@@ -14,12 +14,20 @@ class Company extends Model
 {
     use HasFactory;
 
-
+protected $guarded = [];
     /**
      * @return HasMany
      */
     public function employees()
     {
         return $this->hasMany(Employee::class, 'company');
+    }
+
+    static function saveAttachment()
+    {
+        if (request()->hasFile('logo')) {
+            $path  = request('logo')->store('logo');
+            return  $path  = 'files/' . $path;
+        }
     }
 }

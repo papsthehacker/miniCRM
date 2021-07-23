@@ -7,6 +7,7 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use JeroenNoten\LaravelAdminLte\Components\Tool\Datatable;
 
 class EmployeeController extends Controller
@@ -41,6 +42,8 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
+
+        $employee = new Employee();
         $data = $request->validate([
             'first_name' => 'string|required',
             'last_name' => 'string|required',
@@ -48,7 +51,17 @@ class EmployeeController extends Controller
             'picture' => 'image'
 
         ]);
-        Employee::create($data);
+        if ($request->hasFile('picture')) {
+            $imageName = time().'_'.Str::slug($request->name) . '_' . $request->picture->getClientOriginalName();
+            $request->logo->storeAs('public/pictures', $imageName);
+            $path = asset('/storage/pictures/'.$imageName);
+            $employee->logo = $path;
+        }
+        $employee->first_name = $request->first_name;
+        $employee->last_name = $request->last_name;
+        $employee->email = $request->email;
+        $employee->save();
+
     }
 
     /**
@@ -101,7 +114,7 @@ class EmployeeController extends Controller
             return Redirect::to('admin/employees/' . $id . '/edit')
                 ->withErrors($validator)->withInput($request->all());
         } else {
-            $employee = new Employee();
+            $employee =  Employee::find($id);
             $employee->first_name = $request['first_name'];
             $employee->last_name = $request['last_name'];
             $employee->email = $request['email'];
